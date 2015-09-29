@@ -1,0 +1,3 @@
+title=Beamerkoffer-Verwaltung V 0.4
+author=fred feuerstein
+orientation=portrait
