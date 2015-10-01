@@ -63,3 +63,5 @@ target/
 aux
 bin
 .buildozer
+story*
+myfile

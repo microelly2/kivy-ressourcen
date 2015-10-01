@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 #:kivy 1.0
 
 <kite>:
@@ -108,19 +109,18 @@
 					text: 'HZ 8'
 		AccordionItem:
 			id:buchen
-			title: "uebersichten"
+			title: "Übersichten"
 			markup: True
-			Label:
-				id:buchtext 
-				text:"bla\nblabla\n\nhuhu"
-				markup: True 
+			Button:
+				text:"lange Liste"
+				on_release:app.langeListe()
 			Button:
 				id:buchbut 
-				text:"Heute"
+				text:"Zweispaltig"
 				markup: True 
 				on_release: app.wechseln()
 			Button:
-				text: "Liste 2"
+				text: "Tages Tabelle"
 				on_release: app.wechseln2()
 
 		AccordionItem:
@@ -174,26 +174,30 @@
 		TextInput:
 			id:name
 			text:'Fred Feuerstein'
-		Button:
-			text: 'Buchungen'
-			markup: True
-			on_release: app.holeBuchungen()
+
+#		Button:
+#			text: 'Buchungen'
+#			markup: True
+#			on_release: app.holeBuchungen()
+#		Button:
+#			text: 'Personen'
+#			markup: True
+#			on_release: app.lesedatei("personen")
+#		Button:
+#			text: 'Geraete'
+#			markup: True
+#			on_release: app.lesedatei("geraete")
 
 		Button:
-			text: 'Personen'
-			markup: True
-			on_release: app.lesedatei("personen")
-		Button:
-			text: 'Geraete'
-			markup: True
-			on_release: app.lesedatei("geraete")
-		Button:
-			text: 'Verbinden'
+			text: 'Buchen'
 			markup: True
 			on_release: app.sayhello(self,self.parent.children[4].text)
 		Button:
-			text:'lange Liste'
+			text:'lange Liste gucken'
 			on_release: app.langeListe()
+		Button:
+			text:'Login'
+			on_release: app.configure(self)
 
 
 

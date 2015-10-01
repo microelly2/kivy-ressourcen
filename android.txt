@@ -1,3 +1,4 @@
-title=Beamerkoffer-Verwaltung V 0.4
+title=Beamerkoffer-Verwaltung V 0.6  single user  AA
 author=fred feuerstein
-orientation=portrait
+##orientation=portrait
+orientation=landscape

@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 import kivy
 kivy.require('1.0.9')
 from kivy.app import App
@@ -58,9 +59,9 @@ class kiteApp(App):
 		c= kite(title='Hello world')
 		return c
 
-	def sayhello(self,button,name):
-		print "Hello " +  name + ", this is the simple App!"
-		button.text = "[size=100][b]Super " + name +  "[/b]\nSay hello [color=#ff0000]again![/size][/color]"
+#	def sayhello(self,button,name):
+#		print "Hello " +  name + ", this is the simple App!"
+#		button.text = "[size=100][b]Super " + name +  "[/b]\nSay hello [color=#ff0000]again![/size][/color]"
 
 	def setzeFarbe(self,but):
 		for b in but.parent.children:
@@ -243,22 +244,35 @@ class kiteApp(App):
 
 	def sayhello(self,button,name):
 		print "Hello " +  name + ", this is the simple App!"
-		button.text = "[size=100][b]Super " + name +  "[/b]\nSay hello [color=#ff0000]again![/size][/color]"
+#		button.text = "[size=100][b]Super " + name +  "[/b]\nSay hello [color=#ff0000]again![/size][/color]"
+#		button.text='Buchen'
 		self.name=name
 		
 		print self.ao
 		global superbl
 		print superbl
+		self.root.clear_widgets()
 		
 		if not self.ao:
 			self.ao=addon()
 			self.bl=self.root.bl
-			self.root.remove_widget(self.root.bl)
+		#	self.root.remove_widget(self.root.bl)
 			self.root.add_widget(self.ao)
 		else:
-			self.root.remove_widget(self.ao)
+		#	self.root.remove_widget(self.ao)
 			self.root.add_widget(self.bl)
+
+			self.root.buchen.collapse=True
+			self.root.liste.collapse=False
+			self.root.tag.collapse=True
+			self.root.stunde.collapse=True
+			self.root.geraet.collapse=True
+
 			# self.ao=False
+
+	def sayhello2(self,a):
+		self.sayhello(None,"NAME")
+
 
 	def sendeBuchung(self,mess):
 		c = httplib.HTTPConnection(self.ip)
@@ -276,10 +290,21 @@ class kiteApp(App):
 
 	def lesedatei(self,dateiname):
 		print "Lese Daten aus dem Netz ..."
-		c = httplib.HTTPConnection(self.ip)
+		try:
+			c = httplib.HTTPSConnection(self.ip)
+			c.connect()
+		except (httplib.HTTPException, socket.error) as ex:
+			print "Error:",  ex, ", Host: ",self.ip
+			return []
 		c.request("GET", "/appdat_server/appconfig.php?c="+ dateiname +".txt")
 		response = c.getresponse()
 		print "rsponce:",response.status, response.reason
+		
+		if response.status == 200:
+			print "ok"
+		else:
+			print "problem : the query returned %s because %s" % (response.status, response.reason)  
+		
 		data = response.read()
 		vals=data.split('\n')
 		vals.pop(-1)
@@ -325,9 +350,6 @@ class kiteApp(App):
 					print [t,s,g,buli[t][s][g]]
 					pass
 		return buli
-
-
-
 
 	def holePersonen(self):
 		return self.lesedatei('personen')
@@ -409,10 +431,15 @@ class kiteApp(App):
 			
 			if int(t) <self.heute:
 				continue
+			 
 			for s in sorted(buli[t]):
 				print "--",s
 				for g in sorted(buli[t][s]):
 					print [t,s,g,buli[t][s][g]]
+					nick=buli[t][s][g][0][0:2]
+					if nick <> self.user:
+						print "skip nich ",nick
+						continue
 					tt=self.doyString2(t)
 					ytext= "  ".join([tt,s,g,buli[t][s][g][0][0:2]])
 					btn = Button(text=ytext, size=(280, 40),
@@ -435,9 +462,9 @@ class kiteApp(App):
 		root3=BoxLayout(orientation='vertical')
 		b=Button(text="f1")
 		root3.add_widget(b)
-		b=Button(text="f2",on_release=self.gobl)
+		b=Button(text="Buchen",on_release=self.sayhello2)
 		root3.add_widget(b)
-		b=Button(text="f3", on_release=self.gomain)
+		b=Button(text="Start", on_release=self.gomain)
 		root3.add_widget(b)
 		
 		root=BoxLayout(	orientation='horizontal')
@@ -445,10 +472,18 @@ class kiteApp(App):
 		root.add_widget(root2)
 		
 		self.root.remove_widget(self.ao)
+		try:
+			self.root.remove_widget(self.bl)
+		except:
+			pass
 		self.root.add_widget(root)
 
 	def gomain(self,a):
 		self.root.remove_widget(self.root.children[0])
+		try:
+			self.root.remove_widget(self.bl)
+		except:
+			pass
 		self.root.add_widget(self.ao)
 
 	def gobl(self,a):
@@ -465,6 +500,30 @@ class kiteApp(App):
 		ss=(datetime.datetime.now() + datetime.timedelta(days=int(doy)-day_of_year)).strftime("%d.%m.")
 		return ss
 
+	def configure(self,but):
+		print "configure writer file ..."
+		f = open('myfile','w')
+		f.write('Fr:1234\n') # python will convert \n to os.linesep
+		f.close() # you can omit in most cases as the destructor will call it
+
+		f = open("myfile")
+		lines = f.readlines()
+		for l in lines:
+			l2=l.strip()
+			print "!"+l2+"!"
+		f.close()
+		[self.user,self.passw]=l2.split(':')
+		import hashlib
+		self.md5=hashlib.md5(self.passw).hexdigest()
+		import random
+		self.hash=random.randint(1000,9999)
+		self.md5hash=hashlib.md5(str(self.hash)).hexdigest()
+		print (self.user, self.passw,self.md5,self.hash,self.md5hash)
+		print but
+		but.text=' '.join([self.user, self.passw,self.md5,str(self.hash),self.md5hash])
+		print "done"
+
+
 	def on_start(self):
 		global superbl
 		if not self.ao:
@@ -478,12 +537,17 @@ class kiteApp(App):
 			self.root.remove_widget(self.ao)
 			self.root.add_widget(self.bl)
 			self.ao=False
-		self.personen=self.holePersonen()
+		#self.personen=self.holePersonen()
 		self.geraete=self.holeStunden()
 		self.geraete=self.holeGeraete()
 		self.holeTage()
+		
 		self.root.liste.clear_widgets()
-		self.holeBuchungen()		
+		# testuser
+		self.user='Fr'
+		day_of_year = datetime.datetime.now().timetuple().tm_yday
+		self.heute=day_of_year
+		# self.holeBuchungen()		
 
 if __name__ == '__main__' and True:
 	sap=kiteApp()
