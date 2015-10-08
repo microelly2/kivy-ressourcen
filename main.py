@@ -14,6 +14,7 @@ from kivy.uix.scrollview import ScrollView
 #from kivy.lang import Builder
 
 
+
 from kivy.support import *
 install_android()
 
@@ -29,6 +30,8 @@ superbl=None
 
 import datetime,re,os,random
 import httplib
+import socket
+
 
 class KButton(Button):
 	key=Property('')
@@ -291,16 +294,21 @@ class kiteApp(App):
 		print vals
 		return vals
 
-		
+
 
 	def lesedatei(self,dateiname):
 		print "Lese Daten aus dem Netz ..."
 		try:
 			c = httplib.HTTPSConnection(self.ip)
 			c.connect()
-		except (httplib.HTTPException, socket.error) as ex:
-			print "Error:",  ex, ", Host: ",self.ip
-			return []
+		except :
+			print "Error HTTPS"
+			try:
+				c = httplib.HTTPConnection(self.ip)
+				c.connect()
+			except :
+				print "Error HTTP"
+				return []
 		c.request("GET", "/appdat_server/appconfig.php?c="+ dateiname +".txt")
 		response = c.getresponse()
 		print "rsponce:",response.status, response.reason
