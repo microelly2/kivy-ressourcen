@@ -242,11 +242,12 @@ class kiteApp(App):
 		print "on_stop"
 		#self.schreibeTagDatei()
 
-	def sayhello(self,button,name):
-		print "Hello " +  name + ", this is the simple App!"
+	def sayhello(self,button,name=None):
+		print "Hello " +  str(name) + ", this is the simple App!"
 #		button.text = "[size=100][b]Super " + name +  "[/b]\nSay hello [color=#ff0000]again![/size][/color]"
 #		button.text='Buchen'
-		self.name=name
+		if name: 
+			self.name=name
 		
 		print self.ao
 		global superbl
@@ -267,11 +268,15 @@ class kiteApp(App):
 			self.root.tag.collapse=True
 			self.root.stunde.collapse=True
 			self.root.geraet.collapse=True
+			self.meineBuchungen()
 
 			# self.ao=False
+			# self.liste fuellen
+			
 
 	def sayhello2(self,a):
-		self.sayhello(None,"NAME")
+		self.sayhello(self,a)
+		
 
 
 	def sendeBuchung(self,mess):
@@ -409,6 +414,44 @@ class kiteApp(App):
 			
 			self.root.geraete.add_widget(w)
 
+	def meineBuchungen(self):
+		buli=self.holeBuchungen()
+		self.root.liste.clear_widgets()
+		farbe=True
+		for t in sorted(buli):
+			print "##",t
+			
+			if int(t) <self.heute:
+				continue
+			 
+			for s in sorted(buli[t]):
+				print "--",s
+				for g in sorted(buli[t][s]):
+					print [t,s,g,buli[t][s][g]]
+					nick=buli[t][s][g][0][0:2]
+					
+					if nick <> self.user:
+						print "skip nich ",nick
+						continue
+
+					tt=self.doyString2(t)
+					ytext= "  ".join([tt,s,g,buli[t][s][g][0][0:2]]) 
+					btn = Button(text=ytext, 
+						# size=(280, 40),
+						# size_hint=(None, None)
+						
+					)
+					if farbe:
+						btn.background_color=(1,0,1,1)
+					else:
+						btn.background_color=(0,1,1,1)
+					farbe = not farbe
+
+					self.root.liste.add_widget(btn)
+					pass
+
+
+
 
 	def langeListe(self):
 		layout = GridLayout(cols=1, padding=10, spacing=10,
@@ -437,9 +480,11 @@ class kiteApp(App):
 				for g in sorted(buli[t][s]):
 					print [t,s,g,buli[t][s][g]]
 					nick=buli[t][s][g][0][0:2]
-					if nick <> self.user:
-						print "skip nich ",nick
-						continue
+					
+					#if nick <> self.user:
+					#	print "skip nich ",nick
+					#	continue
+					
 					tt=self.doyString2(t)
 					ytext= "  ".join([tt,s,g,buli[t][s][g][0][0:2]])
 					btn = Button(text=ytext, size=(280, 40),
@@ -460,9 +505,9 @@ class kiteApp(App):
 		
 		
 		root3=BoxLayout(orientation='vertical')
-		b=Button(text="f1")
+		b=Button(text="f1 (nofunc)")
 		root3.add_widget(b)
-		b=Button(text="Buchen",on_release=self.sayhello2)
+		b=Button(text="Buchen",on_release=self.sayhello)
 		root3.add_widget(b)
 		b=Button(text="Start", on_release=self.gomain)
 		root3.add_widget(b)
@@ -503,25 +548,35 @@ class kiteApp(App):
 	def configure(self,but):
 		print "configure writer file ..."
 		f = open('myfile','w')
-		f.write('Fr:1234\n') # python will convert \n to os.linesep
+		print but.parent.children[1]
+		self.user=but.parent.children[1].children[0].text
+		
+		self.name=but.parent.children[1].children[1].text
+		f.write(self.user + ':1234:'+ self.name+'\n') # python will convert \n to os.linesep
 		f.close() # you can omit in most cases as the destructor will call it
+		self.readconfig(but)
 
+	def readconfig(self,but):
 		f = open("myfile")
 		lines = f.readlines()
 		for l in lines:
 			l2=l.strip()
 			print "!"+l2+"!"
 		f.close()
-		[self.user,self.passw]=l2.split(':')
+		[self.user,self.passw,self.name]=l2.split(':')
 		import hashlib
 		self.md5=hashlib.md5(self.passw).hexdigest()
 		import random
 		self.hash=random.randint(1000,9999)
 		self.md5hash=hashlib.md5(str(self.hash)).hexdigest()
 		print (self.user, self.passw,self.md5,self.hash,self.md5hash)
-		print but
-		but.text=' '.join([self.user, self.passw,self.md5,str(self.hash),self.md5hash])
+		try:
+			print but
+			but.text=' '.join([self.user, self.passw,self.md5,str(self.hash),self.md5hash])
+		except: 
+			pass
 		print "done"
+		return [self.user, self.name, self.passw,self.md5,str(self.hash),self.md5hash]
 
 
 	def on_start(self):
@@ -532,6 +587,9 @@ class kiteApp(App):
 			superbl=self.root.kite
 			self.root.remove_widget(self.root.kite)
 			self.root.add_widget(self.ao)
+			ll=self.readconfig(None)
+			self.ao.name.text=ll[0]
+			self.ao.namelong.text=ll[1]
 			print superbl
 		else:
 			self.root.remove_widget(self.ao)
@@ -544,10 +602,11 @@ class kiteApp(App):
 		
 		self.root.liste.clear_widgets()
 		# testuser
-		self.user='Fr'
+		self.user=self.ao.name.text
 		day_of_year = datetime.datetime.now().timetuple().tm_yday
 		self.heute=day_of_year
-		# self.holeBuchungen()		
+		self.meineBuchungen()
+		
 
 if __name__ == '__main__' and True:
 	sap=kiteApp()

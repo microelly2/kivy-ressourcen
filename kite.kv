@@ -116,11 +116,11 @@
 				on_release:app.langeListe()
 			Button:
 				id:buchbut 
-				text:"Zweispaltig"
+				text:"Zweispaltig (nofunc)"
 				markup: True 
 				on_release: app.wechseln()
 			Button:
-				text: "Tages Tabelle"
+				text: "Tages Tabelle (nofunc)"
 				on_release: app.wechseln2()
 
 		AccordionItem:
@@ -165,16 +165,26 @@
 
 
 <addon>:
+	
 	name:name
+	namelong:namelong
 	BoxLayout:
 		orientation: 'vertical'
 		Label:
-			text: '[color=#ffff00][size=60]Snow Kite School[/size][/color]'
+			canvas.before:
+				Color:
+					rgb: 0.5490196078431373, 0.7019607843137254, 0.8156862745098039
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			text: '[color=#ffff00][size=50][b]Snow Kite School[/b][/size][/color]'
 			markup: True
-		TextInput:
-			id:name
-			text:'Fred Feuerstein'
-
+			# background_color:(0.6,0.7,0.9,1)
+			background_color: (0,1,1,1)
+		Image:
+			source: 'samstag.jpg'
+			size_hint: (None, None)
+			size: 800,170
 #		Button:
 #			text: 'Buchungen'
 #			markup: True
@@ -187,14 +197,21 @@
 #			text: 'Geraete'
 #			markup: True
 #			on_release: app.lesedatei("geraete")
-
 		Button:
 			text: 'Buchen'
 			markup: True
-			on_release: app.sayhello(self,self.parent.children[4].text)
+			on_release: app.sayhello(self,self.parent.parent.name.text)
 		Button:
 			text:'lange Liste gucken'
 			on_release: app.langeListe()
+		BoxLayout:
+			orientation: 'horizontal'
+			TextInput:
+				id:namelong
+				text:'Fred Feuerstein'
+			TextInput:
+				id:name
+				text:'Fr'
 		Button:
 			text:'Login'
 			on_release: app.configure(self)
