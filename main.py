@@ -557,12 +557,15 @@ class kiteApp(App):
 		self.readconfig(but)
 
 	def readconfig(self,but):
-		f = open("myfile")
-		lines = f.readlines()
-		for l in lines:
-			l2=l.strip()
-			print "!"+l2+"!"
-		f.close()
+		try:
+			f = open("myfile")
+			lines = f.readlines()
+			for l in lines:
+				l2=l.strip()
+				print "!"+l2+"!"
+			f.close()
+		except:
+			l2='xy:9876:Ix Ypslein' 
 		[self.user,self.passw,self.name]=l2.split(':')
 		import hashlib
 		self.md5=hashlib.md5(self.passw).hexdigest()
