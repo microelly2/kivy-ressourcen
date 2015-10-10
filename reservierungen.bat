@@ -1,3 +1,6 @@
+#/bin/sh
+python main.py
+
 @ECHO off
 
 set HERE=%~dp0
