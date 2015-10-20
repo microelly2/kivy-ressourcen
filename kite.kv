@@ -1,5 +1,7 @@
 # -*- coding: utf8 -*-
 #:kivy 1.0
+# (c) 2015 microelly2 MIT
+
 
 <kite>:
 	buchen:buchen
@@ -168,8 +170,13 @@
 	
 	name:name
 	namelong:namelong
+	password:password
+	addon:addon
+	bucher:bucher.__self__
+	login:login
 	BoxLayout:
 		orientation: 'vertical'
+		id:addon
 		Label:
 			canvas.before:
 				Color:
@@ -198,13 +205,10 @@
 #			markup: True
 #			on_release: app.lesedatei("geraete")
 		Button:
-			text: 'Buchen'
-			markup: True
-			on_release: app.sayhello(self,self.parent.parent.name.text)
-		Button:
 			text:'lange Liste gucken'
 			on_release: app.langeListe()
 		BoxLayout:
+			id:login
 			orientation: 'horizontal'
 			TextInput:
 				id:namelong
@@ -212,9 +216,18 @@
 			TextInput:
 				id:name
 				text:'Fr'
+			TextInput:
+				id:password
+				text:'1234'
+				password:True
 		Button:
 			text:'Login'
 			on_release: app.configure(self)
+		Button:
+			id:bucher
+			text: 'Buchen'
+			markup: True
+			on_release: app.sayhello(self,self.parent.parent.name.text)
 
 
 

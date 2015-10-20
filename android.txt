@@ -1,4 +1,4 @@
-title=Beamerkoffer-Verwaltung V 0.7  single user // installer test A 
-author=fred feuerstein
+title=Beamer V 0.9  20.10.15 
+author=microelly2
 ##orientation=portrait
 orientation=landscape

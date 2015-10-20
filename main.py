@@ -1,4 +1,8 @@
 # -*- coding: utf8 -*-
+#
+# (c) 2015 microelly2 MIT
+#
+
 import kivy
 kivy.require('1.0.9')
 from kivy.app import App
@@ -121,7 +125,7 @@ class kiteApp(App):
 		but.parent.parent.parent.parent.parent.collapse=True
 		self.upd()
 
-	
+
 	def upd(self):
 		pass
 
@@ -138,15 +142,18 @@ class kiteApp(App):
 		else:
 			print "Tag ist da"
 			print self.tag
-			but=Button()
 			mess=str(self.tag+self.heute) + ":"+  str(self.stunde) + ";"+ str(self.geraet)+':'+self.name
 			print mess
 			rc=self.sendeBuchung(mess)
 			print rc
-			but.text=self.doyString(self.tag) + " -"+  str(self.stunde) + "- "+ str(self.geraet)
-			self.but=but
-			but.on_release=self.loesche
-			self.root.liste.add_widget(but)
+			#Buchung anzeigen
+			self.meineBuchungen()
+			#but=Button()
+			#but.text=self.doyString(self.tag) + " -"+  str(self.stunde) + "- "+ str(self.geraet)
+			#self.but=but
+			#but.on_release=self.loesche
+			#self.root.liste.add_widget(but)
+			
 			self.root.buchen.collapse=True
 			self.root.liste.collapse=False
 			print self.root.liste.collapse
@@ -282,17 +289,25 @@ class kiteApp(App):
 		
 
 
+
+
 	def sendeBuchung(self,mess):
 		c = httplib.HTTPConnection(self.ip)
-		c.request("GET", "/appdat_server/appstore.php?m="+ mess+"&u=user&h=1234&k=9876")
+		sendstring= "/appdat_server/appstore.php?m="+ mess+"&u=user&h=1234&k=9876"
+		print "Sendstrung"
+		print sendstring
+		c.request("GET", sendstring)
 		response = c.getresponse()
 		print "rsponce:",response.status, response.reason
-		data = response.read()
-		print data
-		vals=data.split('\n')
-		vals.pop(-1)
-		print vals
-		return vals
+		if response.status == 200:
+			data = response.read()
+			print data
+			vals=data.split('\n')
+			vals.pop(-1)
+			print vals
+			return vals
+		else:
+			print "Fehler Datensendung" 
 
 
 
@@ -354,7 +369,10 @@ class kiteApp(App):
 				buli[t][s][g]
 			except:
 				buli[t][s][g]=[]
-			buli[t][s][g].append(u)
+			if u=='frei':
+				del(buli[t][s][g])
+			else:
+				buli[t][s][g].append(u)
 		for t in sorted(buli):
 #			print "##",t
 			for s in sorted(buli[t]):
@@ -435,9 +453,8 @@ class kiteApp(App):
 			for s in sorted(buli[t]):
 				print "--",s
 				for g in sorted(buli[t][s]):
-					print [t,s,g,buli[t][s][g]]
+					print [t,s,g,buli[t][s][g]] 
 					nick=buli[t][s][g][0][0:2]
-					
 					if nick <> self.user:
 						print "skip nich ",nick
 						continue
@@ -449,6 +466,21 @@ class kiteApp(App):
 						# size_hint=(None, None)
 						
 					)
+					from functools import partial
+					s3= t+':'+s+';'+g+':frei'
+					print s3
+					def myprint(s,btn):
+						print s
+						btn.parent.remove_widget(btn)
+						print "cleared"
+						rc=self.sendeBuchung(s)
+						print rc
+						print "Auswertung ---------------------------------------"
+						self.meineBuchungen()
+						print "aktualisiert ---------------------------------------------"
+					
+					btn.on_release =  partial(myprint,s3,btn)
+					
 					if farbe:
 						btn.background_color=(1,0,1,1)
 					else:
@@ -501,10 +533,10 @@ class kiteApp(App):
 					pass
 	
 		
-		for i in range(130):
-			btn = Button(text="Buchung "+str(i), size=(280, 40),
-				 size_hint=(None, None))
-			layout.add_widget(btn)
+#		for i in range(130):
+#			btn = Button(text="Buchung "+str(i), size=(280, 40),
+#				 size_hint=(None, None))
+#			layout.add_widget(btn)
 		# create a scroll view, with a size < size of the grid
 		root2 = ScrollView(size_hint=(None, None), size=(300, 590),
 				pos_hint={'center_x': .5, 'center_y': .5}, do_scroll_x=False)
@@ -556,15 +588,28 @@ class kiteApp(App):
 	def configure(self,but):
 		print "configure writer file ..."
 		f = open('myfile','w')
-		print but.parent.children[1]
-		self.user=but.parent.children[1].children[0].text
 		
-		self.name=but.parent.children[1].children[1].text
+		#print but.parent.children[1]
+		#print but.parent.children[1].children
+		l=len(but.parent.children) -4
+		for i in but.parent.children:
+			print i
+		print "huhu"  
+		print l
+		self.passw=but.parent.children[l].children[0].text
+		self.user=but.parent.children[l].children[1].text
+		self.name=but.parent.children[l].children[2].text
 		f.write(self.user + ':1234:'+ self.name+'\n') # python will convert \n to os.linesep
 		f.close() # you can omit in most cases as the destructor will call it
+		try:
+			self.addon.add_widget(self.bucher)
+		except:
+			pass
+		
 		self.readconfig(but)
 
 	def readconfig(self,but):
+		l2='xy:9876:Ix Ypslein'
 		try:
 			f = open("myfile")
 			lines = f.readlines()
@@ -583,7 +628,7 @@ class kiteApp(App):
 		print (self.user, self.passw,self.md5,self.hash,self.md5hash)
 		try:
 			print but
-			but.text=' '.join([self.user, self.passw,self.md5,str(self.hash),self.md5hash])
+			but.text='angemeldet als ' + '-'.join([self.user, self.passw,self.md5,str(self.hash),self.md5hash])
 		except: 
 			pass
 		print "done"
@@ -601,6 +646,9 @@ class kiteApp(App):
 			ll=self.readconfig(None)
 			self.ao.name.text=ll[0]
 			self.ao.namelong.text=ll[1]
+			self.bucher=self.ao.bucher
+			self.addon=self.ao.addon
+			self.addon.remove_widget(self.bucher)
 			print superbl
 		else:
 			self.root.remove_widget(self.ao)
@@ -616,7 +664,7 @@ class kiteApp(App):
 		self.user=self.ao.name.text
 		day_of_year = datetime.datetime.now().timetuple().tm_yday
 		self.heute=day_of_year
-		self.meineBuchungen()
+		# self.meineBuchungen()
 		
 
 if __name__ == '__main__' and True:
