@@ -31,26 +31,6 @@
 				Button:
 					text: 'Montag 01.10'
 					on_release: app.setzeTag(self)
-				Button:
-					text: 'Dienstag 02.10'
-					on_release: app.setzeTag(self)
-				Button:
-					text: 'Mittwoch 03.10'
-					on_release: app.setzeTag(self)
-				Button:
-					text: 'Donnerstag 04.10'
-				Button:
-					text: 'Freitag 05.10'
-				Button:
-					text: 'Montag 08.10'
-				Button:
-					text: 'Dienstag 09.10'
-				Button:
-					text: 'Mittwoch 10.10'
-				Button:
-					text: 'Donnerstag 11.10'
-				Button:
-					text: 'Freitag 12.10'
 		AccordionItem:
 			title: "Stunde"
 			id:stunde
@@ -59,26 +39,7 @@
 				id:stunden
 				spacing: "2dp"
 				cols: 3
-				Button:
-					text: '1'
-					on_release: app.setzeStunde(self)
-				Button:
-					text: '2'
-					on_release: app.setzeStunde(self)
-				Button:
-					text: '3'
-				Button:
-					text: '4'
-				Button:
-					text: '5'
-				Button:
-					text: '6'
-				Button:
-					text: '7'
-				Button:
-					text: '8'
-				Button:
-					text: '9'
+
 		AccordionItem:
 			title: "Geraet"
 			id:geraet
@@ -87,28 +48,6 @@
 				id:geraete
 				spacing: "2dp"
 				cols: 3
-				Button:
-					text: 'Tasche 1'
-					on_release: app.setzeGeraet(self)
-				Button:
-					text: 'Tasche 2'
-					on_release: app.setzeGeraet(self)
-				Button:
-					text: 'Koffer 1'
-				Button:
-					text: 'Koffer 2'
-				Button:
-					text: 'was'
-				Button:
-					text: 'was'
-				Button:
-					text: 'BK 4'
-				Button:
-					text: 'BK 5'
-				Button:
-					text: 'HZ 7'
-				Button:
-					text: 'HZ 8'
 		AccordionItem:
 			id:buchen
 			title: "Übersichten"
@@ -135,36 +74,6 @@
 					text: 'Montag, 01.10., 3.Stunde HZ5 Klasse 7A '
 					markup: True
 					on_release: app.but=self;app.loesche()
-				Button:
-					text: 'Montag, 01.10., 5.Stunde HZ7 Klasse 10B '
-					markup: True
-					on_release: app.but=self;app.loesche()
-				Button:
-					text: 'Montag, 01.10., 3.Stunde HZ5 Klasse 7A '
-					markup: True
-					on_release: app.but=self;app.loesche()
-				Button:
-					text: 'Montag, 01.10., 5.Stunde HZ7 Klasse 10B '
-					markup: True
-					on_release: app.but=self;app.loesche()
-				Button:
-					text: 'Montag, 01.10., 3.Stunde HZ5 Klasse 7A '
-					markup: True
-					on_release: app.but=self;app.loesche()
-				Button:
-					text: 'Montag, 01.10., 5.Stunde HZ7 Klasse 10B '
-					markup: True
-					on_release: app.but=self;app.loesche()
-				Button:
-					text: 'Montag, 01.10., 3.Stunde HZ5 Klasse 7A '
-					markup: True
-					on_release: app.but=self;app.loesche()
-				Button:
-					text: 'Montag, 01.10., 5.Stunde HZ7 Klasse 10B '
-					markup: True
-					on_release: app.sayhello(self,"Fred")
-
-
 
 <addon>:
 	
@@ -192,18 +101,6 @@
 			source: 'samstag.jpg'
 			size_hint: (None, None)
 			size: 800,170
-#		Button:
-#			text: 'Buchungen'
-#			markup: True
-#			on_release: app.holeBuchungen()
-#		Button:
-#			text: 'Personen'
-#			markup: True
-#			on_release: app.lesedatei("personen")
-#		Button:
-#			text: 'Geraete'
-#			markup: True
-#			on_release: app.lesedatei("geraete")
 		Button:
 			text:'lange Liste gucken'
 			on_release: app.langeListe()

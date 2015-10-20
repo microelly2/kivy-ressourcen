@@ -23,12 +23,12 @@ from kivy.support import *
 install_android()
 
 
-from kivy.config import Config
+#from kivy.config import Config
 #Config.set('graphics', 'width', '600')
 #Config.set('graphics', 'height', '800')
 
-Config.set('graphics', 'width', '100')
-Config.set('graphics', 'height', '420')
+# Config.set('graphics', 'width', '160')
+# Config.set('graphics', 'height', '620')
 
 superbl=None
 
@@ -380,6 +380,7 @@ class kiteApp(App):
 				for g in sorted(buli[t][s]):
 					print [t,s,g,buli[t][s][g]]
 					pass
+		self.buli=buli
 		return buli
 
 	def holePersonen(self):
@@ -429,13 +430,31 @@ class kiteApp(App):
 		lg=self.lesedatei('geraete')
 		self.root.geraete.clear_widgets()
 		print "aktualisiere geraet"
+		print self.buli
+		print "--------------------------------------"
+		print self.tag
+		print self.heute
+		print self.stunde
+		print "------------------------------"
+		try:
+			print self.buli[str(self.heute+self.tag)][str(self.stunde)]
+			zz=self.buli[str(self.heute+self.tag)][str(self.stunde)]
+		except:
+			zz={}
+			print "tag/stunde frei"
+		print "-------------"
 		for  g in lg:
 			print g
 			gt=datetime.datetime.now().strftime("%H:%M:%S\n") + g
 			gt=g
-			w=Button(text=gt,on_release = self.setzeGeraet)
-			print w
-			print w.on_release
+			if zz.has_key(g):
+				w=Button(text=gt + "\n"+str(zz[g]))
+				w.background_color=(1,0,0,1)
+			else:
+				w=Button(text=gt,on_release = self.setzeGeraet)
+				w.background_color=(0,1,0,1)
+			#print w
+			#print w.on_release
 			# w=Button(text=gt+"TT",on_enter = self.setzeTag)
 			
 			self.root.geraete.add_widget(w)
@@ -509,14 +528,18 @@ class kiteApp(App):
 
 
 		buli=self.holeBuchungen()
+		
 		for t in sorted(buli):
 			print "##",t
-			
+			neuerTag=True
 			if int(t) <self.heute:
 				continue
-			 
+			neueStunde=True 
 			for s in sorted(buli[t]):
 				print "--",s
+				if len(buli[t][s]):
+					neueStunde= not neueStunde
+				print neueStunde
 				for g in sorted(buli[t][s]):
 					print [t,s,g,buli[t][s][g]]
 					nick=buli[t][s][g][0][0:2]
@@ -530,6 +553,16 @@ class kiteApp(App):
 					btn = Button(text=ytext, size=(280, 40),
 						size_hint=(None, None))
 					layout.add_widget(btn)
+					if neueStunde:
+						btn.background_color=(1,0,1,1)
+						print "hh"
+					else:
+						btn.background_color=(0,1,1,1)
+						print "qq"
+					if neuerTag:
+						btn.background_color=(0,0,1,1)
+						neuerTag=False
+					
 					pass
 	
 		
