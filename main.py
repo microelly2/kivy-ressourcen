@@ -564,34 +564,26 @@ class kiteApp(App):
 					#	continue
 					
 					tt=self.doyString2(t)
-					ytext= "  ".join([tt,s,g,buli[t][s][g][0][0:2]])
+					ytext= "  ".join([s,g,buli[t][s][g][0][0:2]])
 					btn = Button(text=ytext, size=(280, 40),
 						size_hint=(None, None))
-					layout.add_widget(btn)
 					if neueStunde:
 						btn.background_color=(1,0,1,1)
-						print "hh"
 					else:
 						btn.background_color=(0,1,1,1)
-						print "qq"
 					if neuerTag:
-						btn.background_color=(0,0,1,1)
+						#
+						ytext2="wochentag, " + tt #  "  ".join([tt,s,g,buli[t][s][g][0][0:2]])
+						btn2 = Button(text=ytext2, size=(280, 40),
+						size_hint=(None, None))
+						btn2.background_color=(0,0,1,1)
+						layout.add_widget(btn2)
 						neuerTag=False
-					
+					layout.add_widget(btn)
 					pass
-	
-		
-#		for i in range(130):
-#			btn = Button(text="Buchung "+str(i), size=(280, 40),
-#				 size_hint=(None, None))
-#			layout.add_widget(btn)
-		# create a scroll view, with a size < size of the grid
 		root2 = ScrollView(size_hint=(None, None), size=(300, 590),
 				pos_hint={'center_x': .5, 'center_y': .5}, do_scroll_x=False)
-		
 		root2.add_widget(layout)
-		
-		
 		root3=BoxLayout(orientation='vertical')
 		b=Button(text="f1 (nofunc)")
 		root3.add_widget(b)
@@ -746,7 +738,11 @@ class kiteApp(App):
 			self.exitnext = True
 			#self.root.lab.text="Press Back again to exit"
 			print "back to exit again"
-			Clock.schedule_once(self.reset_exitnext,2)
+			#kurz  warten auf double exit
+			#Clock.schedule_once(self.reset_exitnext,2)
+			print "self gomain"
+			self.gomain(None)
+			print "yyy 2 done"
 		else:
 			self.stop()
 
