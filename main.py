@@ -733,7 +733,7 @@ class kiteApp(App):
 				installdate="2015-10-21T15:02:35Z"
 				print (installdate)
 			except:
-				return False
+				return True
 			upd=False
 			if installdate >gitdate:
 				mess="--- package " + plugin + " is up to date ---"
