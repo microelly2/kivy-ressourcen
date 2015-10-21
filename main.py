@@ -17,6 +17,10 @@ from kivy.uix.scrollview import ScrollView
 
 #from kivy.lang import Builder
 
+from kivy.clock import Clock
+from kivy.properties import BooleanProperty
+from kivy.utils import platform
+
 
 
 from kivy.support import *
@@ -48,9 +52,19 @@ class addon(FloatLayout):
 class kite(FloatLayout):
 	pass
 
+
+if platform == "android":
+	import android
+	from jnius import autoclass, cast
+	from android.runnable import run_on_ui_thread
+#	Toast = autoclass("android.widget.Toast")
+
+
+
 # die anwendung ...
 class kiteApp(App):
 
+	exitnext = BooleanProperty(False)
 	tag=Property('')
 	stunde=Property('')
 	klasse=Property('')
@@ -63,6 +77,7 @@ class kiteApp(App):
 	ip=Property('freecadbuch.de')
 	
 	def build(self):
+ 		self.bind(on_start=self.post_build_init)
 		c= kite(title='Hello world')
 		return c
 
@@ -698,7 +713,45 @@ class kiteApp(App):
 		day_of_year = datetime.datetime.now().timetuple().tm_yday
 		self.heute=day_of_year
 		# self.meineBuchungen()
-		
+
+
+	def post_build_init(self, *args):
+		# Map Android keys
+		if platform == 'android':
+			android.map_key(android.KEYCODE_BACK, 1000)
+			android.map_key(android.KEYCODE_MENU, 1001)
+		win = self._app_window
+		win.bind(on_keyboard=self._key_handler)
+ 
+	def _key_handler(self, *args):
+		key = args[1]
+		print "key handler"
+		print key
+		try:
+			# Escape or Android's back key
+			#self.root.lab.text="EXIT key=" + str(key)
+			if key in (1000, 27):
+				self.hide_kbd_or_exit()
+				return True
+		except:
+			return False
+
+	def reset_exitnext(self,t):
+		#self.root.lab.text="normal weiter"
+		print "nomral weiter"
+		self.exitnext=False
+
+	def hide_kbd_or_exit(self, *args):
+		if not self.exitnext:
+			self.exitnext = True
+			#self.root.lab.text="Press Back again to exit"
+			print "back to exit again"
+			Clock.schedule_once(self.reset_exitnext,2)
+		else:
+			self.stop()
+
+
+
 
 if __name__ == '__main__' and True:
 	sap=kiteApp()
