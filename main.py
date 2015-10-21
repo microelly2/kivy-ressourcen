@@ -40,6 +40,9 @@ import datetime,re,os,random
 import httplib
 import socket
 
+def update(btn):
+		print "update software .... not implemented"
+
 
 class KButton(Button):
 	key=Property('')
@@ -63,6 +66,7 @@ if platform == "android":
 
 # die anwendung ...
 class kiteApp(App):
+	global update
 
 	exitnext = BooleanProperty(False)
 	tag=Property('')
@@ -79,6 +83,7 @@ class kiteApp(App):
 	def build(self):
  		self.bind(on_start=self.post_build_init)
 		c= kite(title='Hello world')
+		
 		return c
 
 #	def sayhello(self,button,name):
@@ -419,7 +424,7 @@ class kiteApp(App):
 				w=KButton(text=str(g+1), on_release = self.setzeStunde,key=g)
 				print w.key
 				self.root.stunden.add_widget(w)
-			
+
 
 	def holeTage(self):
 		self.root.tage.clear_widgets()
@@ -428,16 +433,9 @@ class kiteApp(App):
 			wd=(datetime.datetime.now() + datetime.timedelta(hours=24*g)).weekday()
 			if wd<>5 and wd<>6:
 				ss= (datetime.datetime.now() + datetime.timedelta(hours=24*g)).strftime(", %d.%m")
-				week   = [ 
-				  'Mo', 
-				  'Di', 
-				  'Mi', 
-				  'Do',  
-				  'Fr', 
-				  'Sa','So']
+				week   = [ 'Mo', 'Di', 'Mi',  'Do',   'Fr', 'Sa','So']
 				gs=week[wd] + ss 
 				w=KButton(text=gs, on_release = self.setzeTag,key=g)
-				print w.key
 				self.root.tage.add_widget(w)
 
 	def aktualisiereGeraete(self,but):
@@ -490,23 +488,16 @@ class kiteApp(App):
 					print [t,s,g,buli[t][s][g]] 
 					nick=buli[t][s][g][0][0:2]
 					if nick <> self.user:
-						print "skip nich ",nick
 						continue
-
 					tt=self.doyString2(t)
 					ytext= "  ".join([tt,s,g,buli[t][s][g][0][0:2]]) 
-					btn = Button(text=ytext, 
-						# size=(280, 40),
-						# size_hint=(None, None)
-						
-					)
+					btn = Button(text=ytext)
 					from functools import partial
 					s3= t+':'+s+';'+g+':frei'
 					print s3
 					def myprint(s,btn):
 						print s
 						btn.parent.remove_widget(btn)
-						print "cleared"
 						rc=self.sendeBuchung(s)
 						print rc
 						print "Auswertung ---------------------------------------"
@@ -520,30 +511,14 @@ class kiteApp(App):
 					else:
 						btn.background_color=(0,1,1,1)
 					farbe = not farbe
-
 					self.root.liste.add_widget(btn)
-					pass
-
-
-
 
 	def langeListe(self):
 		layout = GridLayout(cols=1, padding=10, spacing=10,
 				size_hint=(None, None), width=180)
 		layout.bind(minimum_height=layout.setter('height'))
-#		ao=Builder.load_file('/home/thomas/Dokumente/kivy_buch/k03_simple/simple.kv')
-#		cc=[]
-#		for c in ao.children:
-#			cc.append(c)
-#		for c in cc:
-#			ao.remove_widget(c)
-#			c.size=(200,40)
-#			c.size_hint=(None,None)
-#
-
 
 		buli=self.holeBuchungen()
-		
 		for t in sorted(buli):
 			print "##",t
 			neuerTag=True
@@ -558,11 +533,6 @@ class kiteApp(App):
 				for g in sorted(buli[t][s]):
 					print [t,s,g,buli[t][s][g]]
 					nick=buli[t][s][g][0][0:2]
-					
-					#if nick <> self.user:
-					#	print "skip nich ",nick
-					#	continue
-					
 					tt=self.doyString2(t)
 					ytext= "  ".join([s,g,buli[t][s][g][0][0:2]])
 					btn = Button(text=ytext, size=(280, 40),
@@ -572,7 +542,6 @@ class kiteApp(App):
 					else:
 						btn.background_color=(0,1,1,1)
 					if neuerTag:
-						#
 						ytext2="wochentag, " + tt #  "  ".join([tt,s,g,buli[t][s][g][0][0:2]])
 						btn2 = Button(text=ytext2, size=(280, 40),
 						size_hint=(None, None))
@@ -591,11 +560,9 @@ class kiteApp(App):
 		root3.add_widget(b)
 		b=Button(text="Start", on_release=self.gomain)
 		root3.add_widget(b)
-		
 		root=BoxLayout(	orientation='horizontal')
 		root.add_widget(root3)
 		root.add_widget(root2)
-		
 		self.root.remove_widget(self.ao)
 		try:
 			self.root.remove_widget(self.bl)
@@ -655,7 +622,6 @@ class kiteApp(App):
 			lines = f.readlines()
 			for l in lines:
 				l2=l.strip()
-				print "!"+l2+"!"
 			f.close()
 		except:
 			l2='xy:9876:Ix Ypslein' 
@@ -673,7 +639,6 @@ class kiteApp(App):
 			pass
 		print "done"
 		return [self.user, self.name, self.passw,self.md5,str(self.hash),self.md5hash]
-
 
 	def on_start(self):
 		global superbl
@@ -704,7 +669,15 @@ class kiteApp(App):
 		self.user=self.ao.name.text
 		day_of_year = datetime.datetime.now().timetuple().tm_yday
 		self.heute=day_of_year
-		# self.meineBuchungen()
+		if sap.updater():
+			global update
+			print "update yes/no ..."
+			btn = Button(
+				text='Update Software required', font_size=14,
+				on_release = update 
+			)
+			self.addon.add_widget(btn)
+
 
 
 	def post_build_init(self, *args):
@@ -729,26 +702,51 @@ class kiteApp(App):
 			return False
 
 	def reset_exitnext(self,t):
-		#self.root.lab.text="normal weiter"
-		print "nomral weiter"
+		
 		self.exitnext=False
 
 	def hide_kbd_or_exit(self, *args):
 		if not self.exitnext:
 			self.exitnext = True
-			#self.root.lab.text="Press Back again to exit"
-			print "back to exit again"
 			#kurz  warten auf double exit
-			#Clock.schedule_once(self.reset_exitnext,2)
-			print "self gomain"
+			Clock.schedule_once(self.reset_exitnext,0.5)
 			self.gomain(None)
-			print "yyy 2 done"
 		else:
 			self.stop()
+
+	def updater(self):
+			import re
+			source="https://github.com/microelly2/kivy-ressourcen/archive/master.zip"
+			print(source)
+			plugin="microelly2/kivy-ressourcen"
+			fn='https://api.github.com/repos/microelly2/kivy-ressourcen/commits'
+			gitdate='no date from git'
+			try: 
+				fn='https://api.github.com/repos/' + plugin + '/commits'
+				import urllib,json
+				data=urllib.urlopen(fn).read()
+				print data
+				d = json.loads(data)
+				dit=d[0]
+				gitdate=dit['commit']['committer']['date']
+				print (gitdate)
+				installdate="2015-10-21T15:02:35Z"
+				print (installdate)
+			except:
+				return False
+			upd=False
+			if installdate >gitdate:
+				mess="--- package " + plugin + " is up to date ---"
+			else:
+				mess="!!! update for " + plugin + " recommented !!!"
+				upd=True
+			print mess
+			return upd
 
 
 
 
 if __name__ == '__main__' and True:
 	sap=kiteApp()
+	sap.updater()
 	sap.run()
