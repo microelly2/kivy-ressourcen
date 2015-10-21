@@ -1,4 +1,4 @@
-title=Beamer V 0.12  21.10.15 -portrait + double click exit
+title=Beamer V 0.13  21.10.15 -portrait + double click exit + updater
 author=microelly2
 orientation=portrait
 #orientation=landscape
