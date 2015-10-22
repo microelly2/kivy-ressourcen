@@ -21,6 +21,16 @@ from kivy.clock import Clock
 from kivy.properties import BooleanProperty
 from kivy.utils import platform
 
+from kivy.uix.popup import Popup
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.factory import Factory
+from kivy.clock import Clock
+
+from kivy.support import *
+install_android()
+
+import datetime,re,os,random, time, threading
+import httplib, socket, urllib2, zipfile
 
 
 from kivy.support import *
@@ -62,6 +72,25 @@ if platform == "android":
 	from android.runnable import run_on_ui_thread
 #	Toast = autoclass("android.widget.Toast")
 
+class PopupBox(Popup):
+	pop_up_text = ObjectProperty()
+	def update_pop_up_text(self, p_message):
+		self.pop_up_text.text = p_message
+
+def unzip(zipFilePath, destDir):
+	zfile = zipfile.ZipFile(zipFilePath)
+	if not os.path.exists(destDir):
+			os.mkdir(destDir)
+	for name in zfile.namelist():
+		print name
+		(dirName, fileName) = os.path.split(name)
+		newDir = destDir + '/' + dirName
+		if not os.path.exists(newDir):
+			os.mkdir(newDir)
+		if not fileName == '':
+			fd = open(destDir + '/' + name, 'wb')
+			fd.write(zfile.read(name))
+			fd.close()
 
 
 # die anwendung ...
@@ -674,7 +703,7 @@ class kiteApp(App):
 			print "update yes/no ..."
 			btn = Button(
 				text='Update Software required', font_size=14,
-				on_release = update 
+				on_release = self.process_button_click
 			)
 			self.addon.add_widget(btn)
 
@@ -743,7 +772,53 @@ class kiteApp(App):
 			print mess
 			return upd
 
+####################
+	def show_popup(self):
+		#self.pop_up = Factory.PopupBox()
+		self.pop_up = PopupBox()
+		self.pop_up.update_pop_up_text('Running some task...')
+		self.pop_up.open()
 
+	def process_button_click(self,dummy):
+		self.show_popup()
+		#		self.source=source
+		mythread1 = threading.Thread(target=self.something_that_takes_5_seconds_to_run)
+		mythread = threading.Thread(target=self.readZip)
+		mythread1.start()
+		mythread.start()
+
+	def something_that_takes_5_seconds_to_run(self):
+		thistime = time.time() 
+		while thistime + 5 > time.time(): # 5 seconds
+			self.pop_up.update_pop_up_text('running ' + '*' * int(time.time()-thistime))
+			time.sleep(1)
+
+	def readZip(self,but=None):
+		source='https://github.com/microelly2/kivy-ressourcen/archive/master.zip'
+		self.pop_up.update_pop_up_text('get git ' + source + ' ...')
+		try:
+			
+			response = urllib2.urlopen(source)
+			zipcontent= response.read()
+			with open("my.zip", 'w') as f:
+				f.write(zipcontent)
+			f.close()
+		except:
+			self.pop_up.update_pop_up_text('error getting the git')
+			return
+		self.pop_up.update_pop_up_text('unzip  ...')
+		print "download"
+		try:
+			unzip("my.zip","..")
+		except:
+			self.pop_up.update_pop_up_text('error unzip')
+			return
+		self.pop_up.dismiss()
+
+
+
+
+####################
 
 
 if __name__ == '__main__' and True:
