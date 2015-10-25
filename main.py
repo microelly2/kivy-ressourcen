@@ -92,6 +92,10 @@ def unzip(zipFilePath, destDir):
 			fd.write(zfile.read(name))
 			fd.close()
 
+def wotagstring(wotagint):
+	week   = [ 'Mo', 'Di', 'Mi',  'Do',   'Fr', 'Sa','So']
+	return week[wotagint]
+
 
 # die anwendung ...
 class kiteApp(App):
@@ -106,8 +110,9 @@ class kiteApp(App):
 	but=Property(None)
 	ao=Property(None)
 	bl=Property(None)
-	ip=Property('192.168.178.26')
+	ip=Property('192.168.178.22')
 	ip=Property('freecadbuch.de')
+	
 	
 	def build(self):
  		self.bind(on_start=self.post_build_init)
@@ -159,6 +164,7 @@ class kiteApp(App):
 		print "SETZT GERAET"
 		print but.text
 		self.geraet=but.text
+		self.geraet=but.key
 #		self.setzeFarbe(but)
 #		but.parent.parent.parent.parent.parent.title=but.text
 		but.parent.parent.parent.parent.parent.collapse=True
@@ -342,7 +348,8 @@ class kiteApp(App):
 
 	def sendeBuchung(self,mess):
 		c = httplib.HTTPConnection(self.ip)
-		sendstring= "/appdat_server/appstore.php?m="+ mess+"&u=user&h=1234&k=9876"
+		authstring="&u="+self.user+"&n="+self.name+"&p="+self.passw
+		sendstring= "/appdat_server/appstore.php?m="+ mess+"&u=user&h=1234&k=9876"+authstring 
 		print "Sendstrung"
 		print sendstring
 		c.request("GET", sendstring)
@@ -373,7 +380,10 @@ class kiteApp(App):
 			except :
 				print "Error HTTP"
 				return []
-		c.request("GET", "/appdat_server/appconfig.php?c="+ dateiname +".txt")
+		authstring="&u="+self.user+"&n="+self.name+"&p="+self.passw
+		req="/appdat_server/appconfig.php?c="+ dateiname +".txt" + "&u=user&h=1234&k=9876"+authstring
+		print  req
+		c.request("GET", req)
 		response = c.getresponse()
 		print "rsponce:",response.status, response.reason
 		
@@ -382,10 +392,18 @@ class kiteApp(App):
 		else:
 			print "problem : the query returned %s because %s" % (response.status, response.reason)  
 		
+#		print("-----##-")
 		data = response.read()
+#		print data
+#		print("-----++-")
 		vals=data.split('\n')
+		print "auth string .."
+		print vals[0]
 		vals.pop(-1)
-		print vals
+		vals.pop(0)
+#		for v in vals:
+#			print "!"+v+"!"
+
 		return vals
 
 
@@ -400,28 +418,31 @@ class kiteApp(App):
 		# print buchs
 		buli={}
 		for b in buchs:
-			[k,d]=b.split(';')
-			[t,s]=k.split(':')
-			[g,u]=d.split(':')
-			day=t
-			ss=(datetime.datetime.now() + datetime.timedelta(days=int(day)-day_of_year)).strftime(", %d.%m")
-			print [t,ss,s,g,u]
-			try: 
-				buli[t]
-			except:
-				buli[t]={}
 			try:
-				buli[t][s]
+				[k,d]=b.split(';')
+				[t,s]=k.split(':')
+				[g,u]=d.split(':')
+				day=t
+				ss=(datetime.datetime.now() + datetime.timedelta(days=int(day)-day_of_year)).strftime(", %d.%m")
+				print [t,ss,s,g,u]
+				try: 
+					buli[t]
+				except:
+					buli[t]={}
+				try:
+					buli[t][s]
+				except:
+					buli[t][s]={}
+				try:
+					buli[t][s][g]
+				except:
+					buli[t][s][g]=[]
+				if u=='frei':
+					del(buli[t][s][g])
+				else:
+					buli[t][s][g].append(u)
 			except:
-				buli[t][s]={}
-			try:
-				buli[t][s][g]
-			except:
-				buli[t][s][g]=[]
-			if u=='frei':
-				del(buli[t][s][g])
-			else:
-				buli[t][s][g].append(u)
+				print "fehler bei verarbeiten von " + b + "!"
 		for t in sorted(buli):
 #			print "##",t
 			for s in sorted(buli[t]):
@@ -485,15 +506,30 @@ class kiteApp(App):
 			zz={}
 			print "tag/stunde frei"
 		print "-------------"
-		for  g in lg:
-			print g
-			gt=datetime.datetime.now().strftime("%H:%M:%S\n") + g
-			gt=g
+		for  sg in lg:
+			print sg
+			sgl= sg.split(';')
+			g=sgl[0]
+			if len(sgl)>1:
+				try:
+					wotag=self.tag
+					if wotag>7: wotag -= 7
+					gaddl=sgl[wotag].split(':')
+					print (gaddl)
+					print self.stunde
+					print self.heute
+					gadd=  " (" + gaddl[int(self.stunde)] + ")"
+				except:
+					gadd=""
+			else:
+				gadd=""
+			gt= g +  gadd 
 			if zz.has_key(g):
 				w=Button(text=gt + "\n"+str(zz[g]))
 				w.background_color=(1,0,0,1)
 			else:
-				w=Button(text=gt,on_release = self.setzeGeraet)
+				w=KButton(text=gt,on_release = self.setzeGeraet)
+				w.key=g
 				w.background_color=(0,1,0,1)
 			#print w
 			#print w.on_release
@@ -571,7 +607,10 @@ class kiteApp(App):
 					else:
 						btn.background_color=(0,1,1,1)
 					if neuerTag:
-						ytext2="wochentag, " + tt #  "  ".join([tt,s,g,buli[t][s][g][0][0:2]])
+						wotagint=1
+						wotagint=self.doy2dow(t)
+
+						ytext2=wotagstring(wotagint) + ", " + tt #  "  ".join([tt,s,g,buli[t][s][g][0][0:2]])
 						btn2 = Button(text=ytext2, size=(280, 40),
 						size_hint=(None, None))
 						btn2.background_color=(0,0,1,1)
@@ -619,6 +658,11 @@ class kiteApp(App):
 	def doyString2(self,doy):
 		day_of_year = datetime.datetime.now().timetuple().tm_yday
 		ss=(datetime.datetime.now() + datetime.timedelta(days=int(doy)-day_of_year)).strftime("%d.%m.")
+		return ss
+
+	def doy2dow(self,doy):
+		day_of_year = datetime.datetime.now().timetuple().tm_yday
+		ss=(datetime.datetime.now() + datetime.timedelta(days=int(doy)-day_of_year)).weekday()
 		return ss
 
 	def configure(self,but):
