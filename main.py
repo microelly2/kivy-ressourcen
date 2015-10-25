@@ -3,6 +3,8 @@
 # (c) 2015 microelly2 MIT
 #
 
+vers="V123"
+ 
 import kivy
 kivy.require('1.0.9')
 from kivy.app import App
@@ -688,6 +690,21 @@ class kiteApp(App):
 		
 		self.readconfig(but)
 
+	def readversion(self):
+		l2='title=xy:9876:Ix Ypslein'
+		try:
+			f = open("android.txt")
+			lines = f.readlines()
+			for l in lines:
+				l2=l.split('=')
+				print l2
+				if l2[0]=='title': 
+					f.close()
+					return l2[1].strip()
+		except:
+			return "??"
+
+
 	def readconfig(self,but):
 		l2='xy:9876:Ix Ypslein'
 		try:
@@ -715,6 +732,7 @@ class kiteApp(App):
 
 	def on_start(self):
 		global superbl
+		global vers
 		if not self.ao:
 			self.ao=addon()
 			self.bl=self.root.kite
@@ -750,6 +768,14 @@ class kiteApp(App):
 				on_release = self.process_button_click
 			)
 			self.addon.add_widget(btn)
+		print self.addon.children[0]
+		# Titel setzen
+		
+		self.addon.children[5].text='[color=#ffff00][size=50][b]Snow Kite School V '+vers +'[/b][/size][/color]'
+		print "----------------"
+		title=self.readversion()
+		print "title:"+title
+		self.addon.children[5].text='[color=#ffff00][size=50][b]' + title + '[/b][/size][/color]'
 
 
 
@@ -788,6 +814,8 @@ class kiteApp(App):
 			self.stop()
 
 	def updater(self):
+			return True
+			# hack 
 			import re
 			source="https://github.com/microelly2/kivy-ressourcen/archive/master.zip"
 			print(source)
